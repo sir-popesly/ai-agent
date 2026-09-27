@@ -11,30 +11,25 @@ if api_key is None:
 
 from openai import OpenAI
 
-client = OpenAI(
-    base_url="https://openrouter.ai/api/v1",
-    api_key=api_key,
-)
-
-parser = argparse.ArgumentParser(description="Chatbot")
-parser.add_argument("user_prompt", type=str, help="User prompt")
-args = parser.parse_args()
-
-messages = [
-    {"role": "user", "content": args.user_prompt},
-]
-
-response = client.chat.completions.create(model="openrouter/free", messages=messages,)
-if response.usage is None:
-    raise RuntimeError("usage property is None")
-else:
-    print(f"Prompt tokens: {response.usage.prompt_tokens}\nResponse tokens: {response.usage.completion_tokens}")
-print(response.choices[0].message.content)
-
-
-
 def main():
-    print("Hello from ai-agent!")
+    client = OpenAI(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=api_key)
+
+    parser = argparse.ArgumentParser(description="Chatbot")
+    parser.add_argument("user_prompt", type=str, help="User prompt")
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
+    args = parser.parse_args()
+
+    messages = [{"role": "user", "content": args.user_prompt}]
+    user_prompt = args.user_prompt
+    response = client.chat.completions.create(model="openrouter/free", messages=messages,)
+
+    if response.usage is None:
+        raise RuntimeError("usage property is None")
+    elif args.verbose is True:
+        print(f"User prompt: {user_prompt}\nPrompt tokens: {response.usage.prompt_tokens}\nResponse tokens: {response.usage.completion_tokens}")
+    print(response.choices[0].message.content)
 
 
 if __name__ == "__main__":
