@@ -1,6 +1,9 @@
+from call_function import available_functions
+from prompts import system_prompt
 import os
 import argparse
 from dotenv import load_dotenv
+import json
 
 from openai import OpenAI
 
@@ -21,10 +24,21 @@ def main():
     parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
     args = parser.parse_args()
 
-    messages = [{"role": "user", "content": args.user_prompt}]
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": args.user_prompt},
+    ]
     user_prompt = args.user_prompt
-    response = client.chat.completions.create(model="openrouter/free", messages=messages,)
-
+    response = client.chat.completions.create(
+        model="openrouter/free",
+        messages=messages,
+	tools=available_functions,
+        temperature=0,
+    )
+    message = response.choices[0].message
+    for tool_call in message.tool_calls:
+        function_args = json.loads(tool_call.function.arguments or "{}")
+        print(f"Calling function: {tool_call.function.name}({function_args})")
     if response.usage is None:
         raise RuntimeError("usage property is None")
     elif args.verbose is True:

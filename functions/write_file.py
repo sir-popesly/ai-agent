@@ -16,3 +16,28 @@ def write_file(working_directory: str, file_path: str, content: str) -> str:
 	except Exception as e:
 		return f'Error:{e}'
 
+
+schema_write_file = {
+	"type": "function",
+	"function": {
+		"name": "write_file",
+		"description": "Verifies the target file is within the working directory and is a valid file, then replaces the content of the file with the provided content argument",
+		"parameters": {
+			"type": "object",
+			"properties": {
+				"file_path": {
+					"type": "string",
+					"description": "Relative path to the target file"
+					},
+				"content": {
+					"type": "string",
+					"description": "A string provided to replace the existing content of the target file"
+					},
+				},
+			"required": [
+				"file_path",
+				"content",
+				],
+			},
+		},
+	}
