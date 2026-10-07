@@ -22,7 +22,7 @@ schema_get_file_content = {
 	"type": "function",
 	"function": {
 		"name": "get_file_content",
-		"description": "Verifies the target file is within the workiing directory and is a valid file, then returns the contents of the file up to a character limit of 10,000",
+		"description": "Verifies the target file is within the working directory and is a valid file, then returns the contents of the file up to a character limit of 10,000",
 		"parameters": {
 			"type": "object",
 			"properties": {
