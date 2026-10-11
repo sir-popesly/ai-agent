@@ -4,7 +4,8 @@ import os
 import argparse
 from dotenv import load_dotenv
 import json
-
+from config import MAX_ITERS
+import sys
 from openai import OpenAI
 
 load_dotenv()
@@ -29,26 +30,31 @@ def main():
         {"role": "user", "content": args.user_prompt},
     ]
     user_prompt = args.user_prompt
-    response = client.chat.completions.create(
-        model="openrouter/free",
-        messages=messages,
-	tools=available_functions,
-        temperature=0,
-    )
-    message = response.choices[0].message
-    for tool_call in message.tool_calls:
-        result_message = call_function(tool_call, args.verbose)
-        if not result_message["content"]:
-            raise Exception("Result content is empty")
-        if args.verbose:
-            print(f"-> {result_message['content']}")
-        return result_message
 
-    if response.usage is None:
-        raise RuntimeError("usage property is None")
-    elif args.verbose is True:
-        print(f"User prompt: {user_prompt}\nPrompt tokens: {response.usage.prompt_tokens}\nResponse tokens: {response.usage.completion_tokens}")
-    print(response.choices[0].message.content)
+    for _ in range(MAX_ITERS):
+        response = client.chat.completions.create(
+            model="openrouter/free",
+            messages=messages,
+	    tools=available_functions,
+            temperature=0,
+        )
+        if response.usage is not None:
+            print(f"Prompt tokens: {response.usage.prompt_tokens}\nResponse tokens: {response.usage.completion_tokens}")
+        message = response.choices[0].message
+        messages.append(message)
+        if not message.tool_calls:
+            print(message.content)
+            break
+        for tool_call in message.tool_calls:
+            result_message = call_function(tool_call, args.verbose)
+            if not result_message["content"]:
+                raise Exception("Result content is empty")
+            if args.verbose:
+                print(f"-> {result_message['content']}")
+            messages.append(result_message)
+    else:
+        print("Maximum iterations reached")
+        sys.exit(1)
 
 
 if __name__ == "__main__":

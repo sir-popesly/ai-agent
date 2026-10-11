@@ -14,6 +14,7 @@ available_functions = [
 
 def call_function(tool_call, verbose: bool = False) -> dict:
 	function_name = tool_call.function.name
+	print(tool_call.function.arguments)
 	function_args = json.loads(tool_call.function.arguments or "{}")
 	function_args["working_directory"] = "./calculator"
 	if verbose:
